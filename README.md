@@ -6,7 +6,7 @@ This playbook will record down the attendees name and emails from the Ansible Wo
 1. Make sure that the workshop is fully provionsed and that all the users have used the http://login.d98x.open.redhat.com/ page to grab their workshop credentials. 
 2. You have access to the login url for the workshop for example http://login.d98x.open.redhat.com/list.php
 3. Ansible and Python installed on your the machine that will be running the playbook (default is localhost). 
-4. Most importantly make sure that the client_secret.json is in the folder that you launch the playbook from. The client_secret.json can be retrieved from Nasim Miah.
+4. Most importantly make sure that the **client_secret.json** is in the folder that you launch the playbook from. The **client_secret.json** can be retrieved from Nasim Miah (nmiah@redhat.com).
 
 ## Running the playbook
 Run the playbook as follows. 
