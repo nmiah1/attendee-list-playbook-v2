@@ -1,0 +1,84 @@
+---
+- name: "Return content from list attendees page"
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_prompt:
+    - name: weburl
+      prompt: What is the workshop URL? An example would be http://login.a76d.open.redhat.com/list.php
+      private: no
+
+    - name: password
+      prompt: What is the workhop student password?
+      private: no
+
+    - name: email
+      prompt: What is your Red Hat email?
+      private: no
+  
+  tasks:
+  - name: "Using URI module to pull down the content on the PHP page"
+    uri:
+      url: "{{ weburl }}"
+      method: POST
+      body_format: form-urlencoded
+      body:
+        pass: "{{ password }}"
+        enter: Submit
+      return_content: yes
+    register: login
+
+  - set_fact:
+      myvar: "{{ login.content | to_nice_yaml }}"
+
+  - set_fact:
+      lines: "{{ myvar.split('<tr>')[1:-1] }}"
+      output: ""
+
+  - lineinfile:
+      path:  ansible-attendee-list-{{ ansible_date_time.date }}.csv
+      create: true
+      line: "{{ item.split('<td>')[1][:-5], item.split('<td>')[2][:-5] }}"
+    with_items: "{{ lines }}"
+
+  - name: Remove the brackets from the CSV list file
+    replace: 
+      path: ansible-attendee-list-{{ ansible_date_time.date }}.csv
+      regexp: '[^A-Za-z@. \n,]'
+      replace:  ""
+
+  - name: Install the required pip libraries for the python script to work.
+    pip: 
+      name: 
+        - gspread
+        - oauth2client
+    become: true
+
+  - name: Make a copy of the master python script.
+    copy:
+      src: master-upload.py
+      dest: upload-{{ ansible_date_time.date }}.py
+
+  - name: Dynamically change the copy python script with new attendee list name.
+    replace: 
+      path: upload-{{ ansible_date_time.date }}.py
+      regexp: 'attendee-list'
+      replace: 'ansible-attendee-list-{{ ansible_date_time.date }}'
+  
+  - name: Dynamically change the copy python script with with new csv file.
+    replace: 
+      path: upload-{{ ansible_date_time.date }}.py
+      regexp: 'csvfile'
+      replace: 'ansible-attendee-list-{{ ansible_date_time.date }}.csv'
+
+  - name: Dynamically change the copy python script with with new csv file.
+    replace: 
+      path: upload-{{ ansible_date_time.date }}.py
+      regexp: 'redhat-email'
+      replace: "{{ email }}"
+
+  - name: Run the newly changed python script.
+    script: upload-{{ ansible_date_time.date }}.py
+    args:
+      executable: python3
+    
