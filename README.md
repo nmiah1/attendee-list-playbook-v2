@@ -17,7 +17,7 @@ Example for workshop environment ...
 ansible-playbook list2.yml
 What is the workshop URL? An example would be http://login.d98x.open.redhat.com/list.php: http://login.a76d.open.redhat.com/list.php
 What is the workhop student password?: cNQn9ZxY9pAHYx
-What is the your Red Hat email? 
+What is the your Red Hat email?: redhatter@redhat.com
 ```
 
 ## Result 
